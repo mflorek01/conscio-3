@@ -14,9 +14,11 @@ from agent_lab.parent_runner.scoring import compare
 from agent_lab.evals.run_evals import run_evals
 
 
-def _bootstrap_baseline(settings_root: Path, baseline_dir: Path) -> None:
-    if baseline_dir.exists():
+def _bootstrap_baseline(settings_root: Path, baseline_dir: Path, reset_baseline: bool = False) -> None:
+    if baseline_dir.exists() and not reset_baseline:
         return
+    if baseline_dir.exists() and reset_baseline:
+        shutil.rmtree(baseline_dir)
     baseline_dir.parent.mkdir(parents=True, exist_ok=True)
     source = settings_root / "child_agent"
     shutil.copytree(source, baseline_dir)
@@ -41,9 +43,9 @@ def _run_self_improve(agent_dir: Path, objective: str) -> None:
     module.self_improve(candidate_workspace=agent_dir, objective=objective)
 
 
-def run_iteration(iteration: int) -> dict:
+def run_iteration(iteration: int, reset_baseline: bool = False) -> dict:
     settings = load_settings()
-    _bootstrap_baseline(settings.root, settings.baseline_dir)
+    _bootstrap_baseline(settings.root, settings.baseline_dir, reset_baseline=reset_baseline)
     candidate_dir = _copy_candidate(settings.baseline_dir, settings.candidates_dir)
 
     run_id = datetime.now(UTC).strftime("run_%Y%m%dT%H%M%SZ") + f"_i{iteration}"
@@ -87,10 +89,15 @@ def run_iteration(iteration: int) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run parent self-improvement loop.")
     parser.add_argument("--iterations", type=int, default=1)
+    parser.add_argument(
+        "--reset-baseline",
+        action="store_true",
+        help="Rebuild sandbox/baseline from agent_lab/child_agent before running.",
+    )
     args = parser.parse_args()
 
     for i in range(1, args.iterations + 1):
-        summary = run_iteration(i)
+        summary = run_iteration(i, reset_baseline=args.reset_baseline)
         print(json.dumps(summary, indent=2))
 
 

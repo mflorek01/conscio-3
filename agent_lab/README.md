@@ -30,7 +30,7 @@
 4. Run one parent-loop iteration:
 
    ```bash
-   python -m agent_lab.parent_runner.main --iterations 1
+   python -m agent_lab.parent_runner.main --iterations 1 --reset-baseline
    ```
 
 ## Layout
@@ -46,3 +46,8 @@
 - Python 3.11 target.
 - No network dependency except OpenAI API calls through `llm_client.py`.
 - If `OPENAI_API_KEY` is missing, child operations gracefully degrade to deterministic fallback behavior.
+
+
+### Troubleshooting model errors
+
+If you changed `agent_lab/child_agent/llm_client.py` but still see old model errors, run with `--reset-baseline` so `sandbox/baseline` is rebuilt from source.

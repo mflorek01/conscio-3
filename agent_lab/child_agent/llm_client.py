@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+import importlib
 import importlib.util
 import os
-from typing import Optional, Any
-
+from typing import Any, Optional
 
 DEFAULT_MODEL = "gpt-5.2-thinking"
+MODEL_FALLBACKS = [
+    DEFAULT_MODEL,
+    "gpt-5.2",
+    "gpt-5",
+    "gpt-4.1",
+]
 
 
 class LLMClient:
@@ -30,17 +36,33 @@ class LLMClient:
         self._client = openai_module.OpenAI(api_key=self._api_key)
         return self._client
 
+    def _candidate_models(self) -> list[str]:
+        models = [self._model]
+        models.extend(m for m in MODEL_FALLBACKS if m not in models)
+        return models
+
     def generate_patch(self, system_prompt: str, user_prompt: str) -> Optional[str]:
         client = self._ensure_client()
         if client is None:
             return None
-        response = client.responses.create(
-            model=self._model,
-            reasoning={"effort": "high"},
-            input=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-        )
-        text = getattr(response, "output_text", "")
-        return text.strip() if text else None
+
+        for model_name in self._candidate_models():
+            try:
+                response = client.responses.create(
+                    model=model_name,
+                    reasoning={"effort": "high"},
+                    input=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                )
+                text = getattr(response, "output_text", "")
+                return text.strip() if text else None
+            except Exception as exc:  # fallback on model-not-found only
+                body = str(exc)
+                if "model_not_found" in body or "does not exist" in body:
+                    continue
+                raise
+
+        # If all model names fail because unavailable, degrade gracefully.
+        return None
