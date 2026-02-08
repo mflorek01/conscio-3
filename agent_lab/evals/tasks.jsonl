@@ -1,0 +1,10 @@
+{"id":"task_add","instruction":"Fix add(a,b) so arithmetic addition works.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"add"}}
+{"id":"task_multiply","instruction":"Implement multiply(a,b) correctly.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"multiply"}}
+{"id":"task_divide_zero","instruction":"Make divide(a,b) raise ValueError on division by zero.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"divide"}}
+{"id":"task_even","instruction":"Implement is_even(n) using parity.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"is_even"}}
+{"id":"task_fib","instruction":"Return first n Fibonacci numbers with fibonacci(n).","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"fibonacci"}}
+{"id":"task_ws","instruction":"normalize_whitespace should collapse spaces and trim.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"normalize_whitespace"}}
+{"id":"task_title","instruction":"title_case should capitalize each word.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"title_case"}}
+{"id":"task_unique","instruction":"unique_sorted should return sorted unique values.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"unique_sorted"}}
+{"id":"task_safe_int","instruction":"Add safe_int(value, default=0) that parses ints safely.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"safe_int"}}
+{"id":"task_all","instruction":"Fix all utility functions in src/toy_project/core.py to satisfy tests.","fixture":"toy_project","check":{"type":"pytest","args":["-q"]},"goal":{"type":"tests_pass","target":"all"}}
