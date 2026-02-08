@@ -12,6 +12,7 @@ MODEL_FALLBACKS = [
     "gpt-5",
     "gpt-4.1",
 ]
+REASONING_EFFORTS: list[Optional[str]] = ["high", "xhigh", "medium", None]
 
 
 class LLMClient:
@@ -41,6 +42,27 @@ class LLMClient:
         models.extend(m for m in MODEL_FALLBACKS if m not in models)
         return models
 
+    def _create_response(self, client: Any, model_name: str, system_prompt: str, user_prompt: str) -> Any:
+        for effort in REASONING_EFFORTS:
+            kwargs: dict[str, Any] = {
+                "model": model_name,
+                "input": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+            }
+            if effort is not None:
+                kwargs["reasoning"] = {"effort": effort}
+            try:
+                return client.responses.create(**kwargs)
+            except Exception as exc:
+                body = str(exc)
+                # Try next effort level if this model rejects current reasoning effort.
+                if "reasoning.effort" in body and "unsupported_value" in body:
+                    continue
+                raise
+        return None
+
     def generate_patch(self, system_prompt: str, user_prompt: str) -> Optional[str]:
         client = self._ensure_client()
         if client is None:
@@ -48,14 +70,9 @@ class LLMClient:
 
         for model_name in self._candidate_models():
             try:
-                response = client.responses.create(
-                    model=model_name,
-                    reasoning={"effort": "high"},
-                    input=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                )
+                response = self._create_response(client, model_name, system_prompt, user_prompt)
+                if response is None:
+                    continue
                 text = getattr(response, "output_text", "")
                 return text.strip() if text else None
             except Exception as exc:  # fallback on model-not-found only
