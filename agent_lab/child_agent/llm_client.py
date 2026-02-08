@@ -5,7 +5,7 @@ import importlib.util
 import os
 from typing import Any, Optional
 
-DEFAULT_MODEL = "gpt-5.2-thinking"
+DEFAULT_MODEL = "gpt-5.2-chat-latest"
 MODEL_FALLBACKS = [
     DEFAULT_MODEL,
     "gpt-5.2",
